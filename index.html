@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Top-Down Arena</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <!-- Game Canvas -->
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+    </div>
+
+    <!-- HUD Overlay -->
+    <div id="hud">
+        <!-- Top Left: Core Stats -->
+        <div class="hud-panel top-left">
+            <div class="compact-card level-chip">
+                <span class="compact-icon">LVL</span>
+                <span class="compact-value" id="level-display">1</span>
+            </div>
+            <div class="run-event hidden" id="run-event">СОБЫТИЕ: нет</div>
+            <div class="hero-upgrade-hint hidden" id="hero-upgrade-hint"></div>
+        </div>
+
+        <!-- Bottom Left: HP + XP -->
+        <div class="hud-panel bottom-left-vitals">
+            <div class="health-container">
+                <div class="health-bar-bg">
+                    <div class="health-bar" id="health-bar"></div>
+                    <div class="health-text" id="health-text">100 / 100</div>
+                </div>
+            </div>
+            <div class="xp-container">
+                <div class="xp-bar-bg">
+                    <div class="xp-bar" id="xp-bar"></div>
+                    <div class="xp-text" id="xp-text">0 / 100</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Right: Compact Resources -->
+        <div class="hud-panel top-right">
+            <div class="compact-row">
+                <div class="compact-card">
+                    <span class="compact-icon">🪙</span>
+                    <span class="compact-value" id="coin-display">0</span>
+                </div>
+                <div class="compact-card">
+                    <span class="compact-icon">☠</span>
+                    <span class="compact-value" id="kills-display">0</span>
+                </div>
+                <div class="compact-card">
+                    <span class="compact-icon">✦</span>
+                    <span class="compact-value" id="skill-points-display">1</span>
+                </div>
+                <button id="help-open-button" class="compact-help">H</button>
+            </div>
+        </div>
+
+        <div class="hud-panel top-center wave-panel">
+            <div class="wave-value hidden" id="wave-display">1</div>
+            <div class="wave-state hidden" id="wave-timer">БОЙ</div>
+            <div class="wave-progress-wrap">
+                <div class="wave-progress-fill" id="wave-progress-fill"></div>
+            </div>
+            <div class="wave-meta">
+                <div class="wave-side" id="wave-current-label">Волна 1</div>
+                <div class="wave-side" id="wave-next-label">2</div>
+            </div>
+        </div>
+
+        <!-- Bottom Center: Controls Hint -->
+        <!-- <div class="hud-panel bottom-center">
+            <div class="controls-hint">
+                WASD/ФЫВА - Движение | SPACE/Пробел - Атака | Мышь - Поворот | Q/Й - Ульта | ПКМ - Щит
+            </div>
+        </div> -->
+
+        <!-- Abilities Bar (Center Bottom) -->
+        <div class="abilities-bar">
+            <!-- Ability 1: Dash -->
+            <div class="ability-slot" data-skill-id="dash" data-slot="1">
+                <div class="ability-icon-slot">🏃</div>
+                <div class="ability-cooldown" id="ability1-cooldown"></div>
+                <div class="ability-key-hint">1</div>
+                <div class="ability-tier" id="ability1-tier">T0</div>
+                <div class="ability-lock" id="ability1-lock">LOCK</div>
+            </div>
+
+            <!-- Ability 2: Shield Recharge -->
+            <div class="ability-slot" data-skill-id="shieldRecharge" data-slot="2">
+                <div class="ability-icon-slot">🛡️</div>
+                <div class="ability-cooldown" id="ability2-cooldown"></div>
+                <div class="ability-key-hint">2</div>
+                <div class="ability-tier" id="ability2-tier">T0</div>
+                <div class="ability-lock" id="ability2-lock">LOCK</div>
+            </div>
+
+            <!-- Ability 3: Damage Boost -->
+            <div class="ability-slot" data-skill-id="damageBoost" data-slot="3">
+                <div class="ability-icon-slot">⚔️</div>
+                <div class="ability-cooldown" id="ability3-cooldown"></div>
+                <div class="ability-key-hint">3</div>
+                <div class="ability-tier" id="ability3-tier">T0</div>
+                <div class="ability-lock" id="ability3-lock">LOCK</div>
+            </div>
+
+            <!-- Ability 4: Slow Field -->
+            <div class="ability-slot" data-skill-id="slowField" data-slot="4">
+                <div class="ability-icon-slot">❄️</div>
+                <div class="ability-cooldown" id="ability4-cooldown"></div>
+                <div class="ability-key-hint">4</div>
+                <div class="ability-tier" id="ability4-tier">T0</div>
+                <div class="ability-lock" id="ability4-lock">LOCK</div>
+            </div>
+
+            <!-- Ability 5: Arc Shot -->
+            <div class="ability-slot" data-skill-id="arcShot" data-slot="5">
+                <div class="ability-icon-slot">✨</div>
+                <div class="ability-cooldown" id="ability5-cooldown"></div>
+                <div class="ability-key-hint">F</div>
+                <div class="ability-tier" id="ability5-tier">T0</div>
+                <div class="ability-lock" id="ability5-lock">LOCK</div>
+            </div>
+
+            <!-- Ability 6: Shockwave -->
+            <div class="ability-slot" id="ability6-slot" data-skill-id="shockwave" data-slot="6">
+                <div class="ability-icon-slot">💥</div>
+                <div class="ability-cooldown" id="ability6-cooldown"></div>
+                <div class="ability-key-hint">E</div>
+                <div class="ability-tier" id="ability6-tier">T0</div>
+                <div class="ability-lock" id="ability6-lock">LOCK</div>
+            </div>
+        </div>
+        <div id="skill-tooltip" class="skill-tooltip hidden"></div>
+        <div class="objective-track hidden" id="objective-track">
+            <div class="objective-title" id="objective-title">ЗОНА КОНТРОЛЯ</div>
+            <div class="objective-bar">
+                <div class="objective-fill" id="objective-fill"></div>
+            </div>
+            <div class="objective-meta" id="objective-meta">0% • 0с</div>
+        </div>
+
+        <!-- Bottom Left: Ultimate Ability -->
+        <div class="hud-panel bottom-left">
+            <div class="ability-container">
+                <div class="ability-icon ultimate-icon">⚡</div>
+                <div class="ability-info">
+                    <div class="ability-name">УЛЬТИМЕЙТ</div>
+                    <div class="ability-bar-bg">
+                        <div class="ability-bar ultimate-bar" id="ultimate-bar"></div>
+                        <div class="ability-text" id="ultimate-text">0 / 20</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Right: Shield -->
+        <div class="hud-panel bottom-right">
+            <div class="ability-container">
+                <div class="ability-icon shield-icon">🛡️</div>
+                <div class="ability-info">
+                    <div class="ability-name">ЩИТ</div>
+                    <div class="ability-bar-bg">
+                        <div class="ability-bar shield-bar" id="shield-bar"></div>
+                        <div class="ability-text" id="shield-text">100 / 100</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Damage Numbers Container -->
+    <div id="damage-numbers"></div>
+    <div id="notification-feed" class="notification-feed"></div>
+
+    <!-- Event Broadcast -->
+    <div id="event-overlay" class="hidden">
+        <div class="event-vignette"></div>
+        <div class="event-scanlines"></div>
+        <div class="event-banner" id="event-banner">СОБЫТИЕ</div>
+    </div>
+
+    <!-- Wave Shop -->
+    <div id="shop-screen" class="hidden">
+        <div class="shop-modal">
+            <h2 class="shop-title">ЛАВКА ВОЛНЫ</h2>
+            <div class="shop-subtitle" id="shop-coins-label">Монеты: 0</div>
+            <div class="shop-cards" id="shop-cards"></div>
+            <div class="shop-footer">
+                <button id="shop-reroll-button" class="shop-btn">Обновить (25)</button>
+                <button id="shop-close-button" class="shop-btn secondary">Продолжить</button>
+            </div>
+            <div class="shop-message" id="shop-message"></div>
+        </div>
+    </div>
+
+    <!-- Guide Modal -->
+    <div id="help-screen" class="hidden">
+        <div class="help-modal">
+            <div class="help-head">
+                <h2>УПРАВЛЕНИЕ И НАВЫКИ</h2>
+                <button id="help-close-button" class="shop-btn secondary">Закрыть</button>
+            </div>
+            <div class="help-grid">
+                <div class="help-col">
+                    <h3>Управление</h3>
+                    <p>`WASD` - движение</p>
+                    <p>`Space` - мили-атака</p>
+                    <p>`1..4, F, E` - навыки</p>
+                    <p>`Q` - ультимейт</p>
+                    <p>`ПКМ` - щит</p>
+                    <p>`H` - открыть/закрыть справку</p>
+                    <p>Клик по иконке навыка внизу - прокачка</p>
+                </div>
+                <div class="help-col">
+                    <h3>Навыки (ранги I/II/III)</h3>
+                    <div id="help-skills-list" class="help-skills-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Level Up Notification -->
+    <div id="level-up-notification" class="hidden">
+        <div class="level-up-content">
+            <div class="level-up-title">ПОВЫШЕНИЕ УРОВНЯ!</div>
+            <div class="level-up-text">Уровень <span id="new-level">2</span></div>
+        </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="game-over-screen" class="hidden">
+        <div class="game-over-content">
+            <h1 class="game-over-title">ИГРА ОКОНЧЕНА</h1>
+            <div class="game-over-stats">
+                <div class="final-stat">
+                    <span class="final-stat-label">Достигнутый уровень:</span>
+                    <span class="final-stat-value" id="final-level">1</span>
+                </div>
+                <div class="final-stat">
+                    <span class="final-stat-label">Собрано монет:</span>
+                    <span class="final-stat-value" id="final-coins">0</span>
+                </div>
+                <div class="final-stat">
+                    <span class="final-stat-label">Убито врагов:</span>
+                    <span class="final-stat-value" id="final-kills">0</span>
+                </div>
+            </div>
+            <button id="restart-button" class="restart-btn">НАЧАТЬ ЗАНОВО</button>
+        </div>
+    </div>
+
+    <!-- Pause Screen -->
+    <div id="pause-screen" class="hidden">
+        <div class="pause-content">
+            <h2 class="pause-title">ПАУЗА</h2>
+            <div class="pause-actions">
+                <button id="pause-continue-button" class="pause-btn">Продолжить</button>
+                <button id="pause-exit-button" class="pause-btn secondary">Выйти в меню</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Game Scripts -->
+    <script src="utils.js"></script>
+    <script src="audio.js"></script>
+    <script src="effects.js"></script>
+    <script src="player.js"></script>
+    <script src="enemy.js"></script>
+    <script src="coins.js"></script>
+    <script src="health.js"></script>
+    <script src="combat.js"></script>
+    <script src="ui.js"></script>
+    <script src="game.js"></script>
+</body>
+
+</html>

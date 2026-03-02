@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arena Menu</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap');
+
+        :root {
+            --bg: #070b1d;
+            --panel: rgba(8, 12, 32, 0.78);
+            --line: rgba(125, 211, 252, 0.34);
+            --line-strong: rgba(125, 211, 252, 0.72);
+            --text: #e2e8f0;
+            --muted: #9ca3af;
+            --chip: rgba(30, 41, 59, 0.7);
+            --accent: #38bdf8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            min-height: 100vh;
+            color: var(--text);
+            background:
+                radial-gradient(circle at 20% 15%, rgba(56, 189, 248, 0.18), transparent 38%),
+                radial-gradient(circle at 80% 75%, rgba(99, 102, 241, 0.24), transparent 46%),
+                var(--bg);
+            display: grid;
+            place-items: center;
+            padding: 16px;
+        }
+
+        .menu {
+            width: min(560px, 94vw);
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            background: var(--panel);
+            backdrop-filter: blur(10px);
+            padding: 26px;
+        }
+
+        .menu-title {
+            text-align: center;
+            font-size: 56px;
+            line-height: 1;
+            letter-spacing: 4px;
+            margin-bottom: 6px;
+            text-shadow: 0 0 24px rgba(56, 189, 248, 0.35);
+        }
+
+        .menu-subtitle {
+            text-align: center;
+            color: var(--muted);
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .actions {
+            display: grid;
+            gap: 10px;
+        }
+
+        .btn {
+            border: 1px solid var(--line);
+            border-radius: 13px;
+            background: rgba(15, 23, 42, 0.9);
+            color: var(--text);
+            font: inherit;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            padding: 14px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: border-color 0.15s ease, transform 0.15s ease;
+        }
+
+        .btn:hover {
+            border-color: var(--line-strong);
+            transform: translateY(-1px);
+        }
+
+        .hint {
+            margin-top: 14px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 16px;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(2, 6, 23, 0.8);
+            padding: 14px;
+            z-index: 10;
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .modal-box {
+            width: min(1180px, 98vw);
+            max-height: 92vh;
+            overflow: auto;
+            border-radius: 18px;
+            border: 1px solid var(--line);
+            background: rgba(5, 10, 26, 0.96);
+            padding: 18px;
+        }
+
+        .modal-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .modal-title {
+            font-size: 34px;
+            letter-spacing: 1px;
+        }
+
+        .close-btn {
+            width: auto;
+            min-width: 110px;
+            font-size: 20px;
+            padding: 8px 12px;
+        }
+
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .tab-btn {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 8px 12px;
+            background: var(--chip);
+            color: var(--text);
+            font: inherit;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .tab-btn.active {
+            border-color: var(--line-strong);
+            color: #e0f2fe;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .card {
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 12px;
+            background: rgba(15, 23, 42, 0.85);
+            padding: 12px;
+        }
+
+        .card h3 {
+            font-size: 22px;
+            margin-bottom: 4px;
+            color: #e0f2fe;
+        }
+
+        .card p {
+            font-size: 17px;
+            color: #cbd5e1;
+            line-height: 1.25;
+            margin-bottom: 4px;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .skill-btn {
+            border: 1px solid rgba(125, 211, 252, 0.35);
+            border-radius: 12px;
+            background: rgba(30, 41, 59, 0.72);
+            color: var(--text);
+            font: inherit;
+            font-size: 18px;
+            font-weight: 700;
+            padding: 10px;
+            text-align: left;
+            cursor: default;
+        }
+
+        .skill-btn span {
+            display: block;
+            color: var(--muted);
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .chip {
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            border-radius: 999px;
+            padding: 4px 10px;
+            background: rgba(15, 23, 42, 0.8);
+            font-size: 15px;
+            color: #cbd5e1;
+        }
+
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .skills-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .menu-title {
+                font-size: 42px;
+            }
+
+            .btn {
+                font-size: 22px;
+            }
+
+            .skills-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="menu">
+        <h1 class="menu-title">ARENA</h1>
+        <p class="menu-subtitle">Выживание по волнам</p>
+        <div class="actions">
+            <a class="btn" href="index.html">Начать игру</a>
+            <button class="btn" data-open="settings-modal">Настройки</button>
+            <button class="btn" data-open="howto-modal">Как играть</button>
+        </div>
+        <p class="hint">Во время игры нажми ESC, чтобы выйти в меню</p>
+    </main>
+
+    <section class="modal" id="settings-modal">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h2 class="modal-title">Настройки</h2>
+                <button class="btn close-btn" data-close>Закрыть</button>
+            </div>
+
+            <div class="tabs" data-tabs>
+                <button class="tab-btn active" data-tab="settings-controls">Управление</button>
+                <button class="tab-btn" data-tab="settings-build">Билд навыков</button>
+                <button class="tab-btn" data-tab="settings-audio">Аудио/Интерфейс</button>
+            </div>
+
+            <div class="tab-panel active" id="settings-controls">
+                <div class="grid">
+                    <div class="card">
+                        <h3>Клавиши</h3>
+                        <p><b>WASD</b> - движение</p>
+                        <p><b>Пробел</b> - мили-атака</p>
+                        <p><b>1/2/3/4/F/E</b> - активные навыки</p>
+                        <p><b>Q</b> - ультимейт</p>
+                        <p><b>ПКМ</b> - щит</p>
+                        <p><b>H</b> - справка</p>
+                        <p><b>ESC</b> - выход в меню</p>
+                    </div>
+                    <div class="card">
+                        <h3>Советы по управлению</h3>
+                        <p>1. Держи дистанцию от взрывников и топтунов.</p>
+                        <p>2. Рывок лучше использовать как сейв.</p>
+                        <p>3. Ударная волна хороша для выхода из окружения.</p>
+                        <p>4. Не копи все кнопки, играй по ситуации.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-panel" id="settings-build">
+                <div class="skills-grid">
+                    <button class="skill-btn">1 Рывок <span>Мобильность и сейв</span></button>
+                    <button class="skill-btn">2 Щит+ <span>Мгновенная перезарядка щита</span></button>
+                    <button class="skill-btn">3 Баф урона <span>Окно агрессии</span></button>
+                    <button class="skill-btn">4 Морозная зона <span>Контроль толпы + метеоры</span></button>
+                    <button class="skill-btn">F Руна-выстрел <span>Дальний урон по целям</span></button>
+                    <button class="skill-btn">E Ударная волна <span>Отбрасывание и зачистка</span></button>
+                </div>
+                <div class="row">
+                    <span class="chip">Ранги навыков: I / II / III</span>
+                    <span class="chip">Очки: суммарно 1/3/5 на максимум</span>
+                    <span class="chip">Открывай навыки в своем порядке</span>
+                </div>
+            </div>
+
+            <div class="tab-panel" id="settings-audio">
+                <div class="grid">
+                    <div class="card">
+                        <h3>Интерфейс</h3>
+                        <p>HUD и уведомления настроены на быстрый геймплей.</p>
+                        <p>Критичные сообщения отображаются в ленте под прогрессом волны.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Аудио</h3>
+                        <p>В игре используются UI-звуки и звуки подбора ресурсов.</p>
+                        <p>Этот экран может быть расширен полноценными слайдерами громкости.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="modal" id="howto-modal">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h2 class="modal-title">Как играть</h2>
+                <button class="btn close-btn" data-close>Закрыть</button>
+            </div>
+
+            <div class="tabs" data-tabs>
+                <button class="tab-btn active" data-tab="how-core">Основа</button>
+                <button class="tab-btn" data-tab="how-waves">Волны и магазин</button>
+                <button class="tab-btn" data-tab="how-skills">Навыки</button>
+                <button class="tab-btn" data-tab="how-mobs">Мобы и атаки</button>
+                <button class="tab-btn" data-tab="how-events">События</button>
+            </div>
+
+            <div class="tab-panel active" id="how-core">
+                <div class="grid">
+                    <div class="card">
+                        <h3>Цель</h3>
+                        <p>Выживай, зарабатывай монеты, усиливай героя и проходи как можно больше волн.</p>
+                        <p>По мере прогресса враги становятся плотнее и опаснее.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Ресурсы</h3>
+                        <p><b>XP</b> повышает уровень и дает очки навыков.</p>
+                        <p><b>Монеты</b> тратятся в магазине между блоками волн.</p>
+                        <p><b>Щит</b> гасит урон, пока активен ПКМ.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-panel" id="how-waves">
+                <div class="grid">
+                    <div class="card">
+                        <h3>Как идут волны</h3>
+                        <p>Вверху слева показывается текущая волна, справа следующая.</p>
+                        <p>Если следующая магазинная - справа будет иконка 🛒.</p>
+                        <p>Новые типы мобов открываются постепенно каждые 3 волны.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Магазин</h3>
+                        <p>Магазин открывается после каждого 3-го боевого этапа, только после полной зачистки врагов.</p>
+                        <p>В магазине можно улучшать статы, питомцев и синергию билдов.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-panel" id="how-skills">
+                <div class="grid">
+                    <div class="card">
+                        <h3>Прокачка</h3>
+                        <p>Каждый навык имеет 3 ранга: I, II, III.</p>
+                        <p>Стоимость рангов: 1, затем 2, затем 2 очка.</p>
+                        <p>Ты сам выбираешь, что открывать и в каком порядке.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Примеры</h3>
+                        <p><b>Рывок</b>: от базового даша до 2 зарядов.</p>
+                        <p><b>Морозная зона</b>: на III ранге дает ледяные метеоры.</p>
+                        <p><b>Ударная волна</b>: растут радиус, урон и отталкивание.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-panel" id="how-mobs">
+                <div class="grid">
+                    <div class="card">
+                        <h3>Типы врагов</h3>
+                        <p><b>Crawler</b>: базовый ближний.</p>
+                        <p><b>Splitter</b>: делится на мини-версии.</p>
+                        <p><b>Dasher</b>: рывки к игроку.</p>
+                        <p><b>Bomber</b>: взрыв по близости.</p>
+                        <p><b>Sniper</b>: дальний выстрел с телеграфом.</p>
+                        <p><b>Stomper</b>: тяжелый удар по земле после зарядки.</p>
+                        <p><b>Brute/Crusher/Elite</b>: усиленные тяжелые цели.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Как контрить</h3>
+                        <p>1. Снайперам не стой на линии прицела.</p>
+                        <p>2. От топтуна выходи из круга предупреждения.</p>
+                        <p>3. Взрывника не подпускай в упор.</p>
+                        <p>4. Тяжей режь под бафом урона + руна/волна.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-panel" id="how-events">
+                <div class="grid">
+                    <div class="card">
+                        <h3>Случайные события</h3>
+                        <p><b>Кровавая луна</b>: враги быстрее и больнее.</p>
+                        <p><b>Золотая лихорадка</b>: больше монет за убийства.</p>
+                        <p><b>Живительный туман</b>: восстановление здоровья.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Особые механики</h3>
+                        <p><b>Зона контроля</b>: стой в круге, чтобы заполнить шкалу и получить награду.</p>
+                        <p><b>Охота</b>: включается при избыточном кайтинге без боя; охотники без награды по монетам.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const openButtons = document.querySelectorAll('[data-open]');
+        const closeButtons = document.querySelectorAll('[data-close]');
+
+        for (const button of openButtons) {
+            button.addEventListener('click', () => {
+                const modal = document.getElementById(button.dataset.open);
+                if (modal) modal.classList.add('open');
+            });
+        }
+
+        for (const button of closeButtons) {
+            button.addEventListener('click', () => {
+                const modal = button.closest('.modal');
+                if (modal) modal.classList.remove('open');
+            });
+        }
+
+        window.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('open');
+            }
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal.open').forEach((m) => m.classList.remove('open'));
+            }
+        });
+
+        document.querySelectorAll('.modal').forEach((modal) => {
+            const tabsRoot = modal.querySelector('[data-tabs]');
+            if (!tabsRoot) return;
+            const tabButtons = tabsRoot.querySelectorAll('.tab-btn');
+
+            tabButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    const tabId = button.dataset.tab;
+                    tabButtons.forEach((b) => b.classList.remove('active'));
+                    button.classList.add('active');
+
+                    modal.querySelectorAll('.tab-panel').forEach((panel) => {
+                        panel.classList.toggle('active', panel.id === tabId);
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
